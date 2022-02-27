@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
 const app = require("./app");
+console.log(process.env.DB_HOST)
 
-mongoose.connect("mongodb://localhost:27017/portal-experto-blog")
+mongoose.connect(process.env.DB_HOST)
   .then(() => {
     app.listen(app.get('port'), () => {
       console.log(">>> DB is Connected");
