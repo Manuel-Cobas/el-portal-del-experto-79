@@ -41,8 +41,4 @@ app.set("port", process.env.PORT || 3001);
 // Routes
 app.use("/user", UserRoutes);
 
-app.get("/", (req, res) => {
-  res.send("Hello World", req.session);
-});
-
 module.exports = app;
