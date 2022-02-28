@@ -60,7 +60,7 @@ async function Login(req, res) {
   req.session.userId = hash;
 
   return res.status(200).send({
-    userFound,
+    user: userFound,
   });
 }
 
