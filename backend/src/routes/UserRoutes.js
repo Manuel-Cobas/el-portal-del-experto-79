@@ -6,5 +6,7 @@ router.post("/register", UserController.Register);
 
 router.post("/login", UserController.Login);
 
+router.get("/all-admin-users", UserController.allAdminUsers);
+
 
 module.exports = router;

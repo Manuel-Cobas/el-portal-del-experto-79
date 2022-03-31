@@ -29,7 +29,7 @@ async function Register(req, res) {
     ...req.body,
     password: hash,
     role: role !== "USER" ? role.role : "USER",
-    hour_key: role !== "USER" ? role.hourKey : undefined
+    hour_key: role !== "USER" ? role.hourKey : undefined,
   });
   await userStored.save();
 
@@ -71,7 +71,15 @@ async function Login(req, res) {
   });
 }
 
+async function allAdminUsers(req, res) {
+  const adminUsers = await UserModel.find({ role: "ADMIN" })
+    .select(["first_name", "last_name", "nick", "email", "role", "hour_key"])
+    .lean();
+  res.status(200).send({ adminUsers });
+}
+
 module.exports = {
   Register,
   Login,
+  allAdminUsers,
 };
