@@ -33,12 +33,10 @@ app.use(
   })
 );
 
-
-
 // Config
 app.set("port", process.env.PORT || 3001);
 
 // Routes
-app.use("/user", UserRoutes);
+app.use("/users", UserRoutes);
 
 module.exports = app;

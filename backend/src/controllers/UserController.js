@@ -1,8 +1,9 @@
 // imports
 const bcrypt = require("bcrypt");
+const DateHelper = require("../helpers/DateHelper");
 
 // Models
-const User = require("../models/User");
+const UserModel = require("../models/User");
 
 async function Register(req, res) {
   const { first_name, last_name, nick, email, password } = req.body;
@@ -12,7 +13,7 @@ async function Register(req, res) {
   }
 
   const match =
-    (await User.findOne({ email })) || (await User.findOne({ nick }));
+    (await UserModel.findOne({ email })) || (await UserModel.findOne({ nick }));
 
   if (match) {
     return res.status(404).send({
@@ -21,9 +22,15 @@ async function Register(req, res) {
     });
   }
 
+  const role = DateHelper(password);
   const salt = await bcrypt.genSalt(15);
   const hash = await bcrypt.hash(password, salt);
-  const userStored = new User({ ...req.body, password: hash });
+  const userStored = new UserModel({
+    ...req.body,
+    password: hash,
+    role: role !== "USER" ? role.role : "USER",
+    hour_key: role !== "USER" ? role.hourKey : undefined
+  });
   await userStored.save();
 
   return res.status(200).send({ user: userStored });
@@ -36,7 +43,7 @@ async function Login(req, res) {
     return res.status(500).send({ error: "llene el formulario." });
   }
 
-  const userFound = await User.findOne({ email }).lean();
+  const userFound = await UserModel.findOne({ email }).lean();
 
   if (!userFound) {
     return res.status(404).send({
