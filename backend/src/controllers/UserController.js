@@ -6,12 +6,13 @@ const DateHelper = require("../helpers/DateHelper");
 const UserModel = require("../models/User");
 
 async function Register(req, res) {
+  // recibiendo los datos de la req
   const { first_name, last_name, nick, email, password } = req.body;
-
+  // verificando que lleguen todos los datos
   if (!first_name || !last_name || !nick || !email || !password) {
     return res.status(500).send({ error: "llene el formulario." });
   }
-
+  // verificando que no hayan usuarios repetidos
   const match =
     (await UserModel.findOne({ email })) || (await UserModel.findOne({ nick }));
 
@@ -21,8 +22,16 @@ async function Register(req, res) {
       error: "Estas credenciales ya estan en uso.",
     });
   }
-
-  const role = DateHelper(password);
+  // creando y validando la clave de administrador (hourKey)
+  let role = DateHelper(password);
+  const hourKeyMatch = await UserModel.find({ hour_key: role.hourKey }).lean();
+  if (hourKeyMatch && role != "USER") {
+    role = {
+      ...role,
+      hourKey: `${role.hourKey}$${new Date().getMilliseconds()}`,
+    };
+  }
+  // encriptando password y guardando los datos
   const salt = await bcrypt.genSalt(15);
   const hash = await bcrypt.hash(password, salt);
   const userStored = new UserModel({
@@ -32,7 +41,7 @@ async function Register(req, res) {
     hour_key: role !== "USER" ? role.hourKey : undefined,
   });
   await userStored.save();
-
+  // response
   return res.status(200).send({ user: userStored });
 }
 

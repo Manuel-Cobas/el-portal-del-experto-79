@@ -5,7 +5,7 @@ const cors = require("cors");
 const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
 const dotenv = require("dotenv").config();
-
+const DateHelper = require("./helpers/DateHelper");
 // Import Routes
 const UserRoutes = require("./routes/UserRoutes");
 
@@ -38,5 +38,6 @@ app.set("port", process.env.PORT || 3001);
 
 // Routes
 app.use("/users", UserRoutes);
+app.get("/prueba", DateHelper)
 
 module.exports = app;
