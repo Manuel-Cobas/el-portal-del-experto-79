@@ -5,6 +5,8 @@ const DateHelper = require("../helpers/DateHelper");
 // Models
 const UserModel = require("../models/User");
 
+// ----- Register -----
+
 async function Register(req, res) {
   // recibiendo los datos de la req
   const { first_name, last_name, nick, email, password } = req.body;
@@ -37,6 +39,8 @@ async function Register(req, res) {
   // response
   return res.status(200).send({ user: userStored });
 }
+
+// ----- Login -----
 
 async function Login(req, res) {
   // recibiendo los datos
@@ -73,6 +77,7 @@ async function Login(req, res) {
   });
 }
 
+// ----- Delete User -----
 async function deleteUser(req, res) {
   // recibiendo ID de usuario
   const userDeleted = await UserModel.findByIdAndDelete(req.params.id);
@@ -88,6 +93,8 @@ async function deleteUser(req, res) {
   });
 }
 
+// ----- All Admin Users -----
+
 async function allAdminUsers(req, res) {
   // buscando los usuarios Administradores
   const adminUsers = await UserModel.find({ role: "ADMIN" })
@@ -96,6 +103,8 @@ async function allAdminUsers(req, res) {
   // respuesta :D
   res.status(200).send({ adminUsers });
 }
+
+// ----- Sign Off -----
 
 async function signOff(req, res) {
   if (!req.session.userId) {
@@ -112,6 +121,8 @@ async function signOff(req, res) {
     },
   });
 }
+
+// ----- exports -----
 
 module.exports = {
   Register,
