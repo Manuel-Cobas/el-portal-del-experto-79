@@ -93,6 +93,37 @@ async function deleteUser(req, res) {
   });
 }
 
+// ----- Edit Username -----
+
+async function editUsername(req, res) {
+  // recibo userId y datos del formulario
+  let userId = req.params.id;
+  const { first_name, last_name } = req.body;
+  // verificando que llegaron los datos
+  if (!first_name || !last_name) {
+    return res.status(404).send({
+      error: "llene el formulario",
+    });
+  }
+  // en caso de que no llegue el id por url se usara el de la sesion
+  if (!req.params.id) {
+    userId = req.session.userId;
+  }
+  // actualizando los datos
+  const userUpdated = await UserModel.findByIdAndUpdate(
+    userId,
+    { first_name, last_name },
+    { new: true }
+  ).lean();
+  // respuesta :D
+  return res.status(200).send({
+    userData: {
+      ...userUpdated,
+      password: undefined,
+    },
+  });
+}
+
 // ----- All Admin Users -----
 
 async function allAdminUsers(req, res) {
@@ -130,4 +161,5 @@ module.exports = {
   allAdminUsers,
   deleteUser,
   signOff,
+  editUsername,
 };

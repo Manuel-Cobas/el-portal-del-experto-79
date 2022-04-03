@@ -13,4 +13,6 @@ router.delete("/delete-user/:id", Auth, UserController.deleteUser);
 
 router.post("/sign-off", Auth, UserController.signOff);
 
+router.put("/edit-username/:id?", Auth, UserController.editUsername);
+
 module.exports = router;
