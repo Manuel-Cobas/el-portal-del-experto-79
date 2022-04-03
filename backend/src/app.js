@@ -5,9 +5,10 @@ const cors = require("cors");
 const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
 const dotenv = require("dotenv").config();
-const DateHelper = require("./helpers/DateHelper");
+
 // Import Routes
 const UserRoutes = require("./routes/UserRoutes");
+const PublicationRoutes = require("./routes/PublicationRoutes");
 
 // Initializations
 const app = express();
@@ -24,8 +25,8 @@ app.use(cors());
 app.use(
   session({
     secret: process.env.SECRET,
-    cookie:{
-      maxAge: (1000 * 60 * 60 * 24 * 7)
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24 * 7,
     },
     resave: true,
     saveUninitialized: true,
@@ -38,6 +39,6 @@ app.set("port", process.env.PORT || 3001);
 
 // Routes
 app.use("/users", UserRoutes);
-app.get("/prueba", DateHelper)
+app.use("/publications", PublicationRoutes);
 
 module.exports = app;
