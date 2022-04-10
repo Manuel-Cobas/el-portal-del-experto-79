@@ -21,7 +21,7 @@ async function Register(req, res) {
   if (match) {
     return res.status(404).send({
       user: req.body,
-      error: "Estas credenciales ya estan en uso.",
+      error: "Estas credenciales ya estan en uso."
     });
   }
   // creando y validando la clave de administrador (hourKey)
@@ -33,7 +33,7 @@ async function Register(req, res) {
     ...req.body,
     password: hash,
     role: role !== "USER" ? role.role : "USER",
-    hour_key: role !== "USER" ? role.hourKey : undefined,
+    hour_key: role !== "USER" ? role.hourKey : undefined
   });
   await userStored.save();
   // response
@@ -55,7 +55,7 @@ async function Login(req, res) {
   if (!userFound) {
     return res.status(404).send({
       user: req.body,
-      error: "Estas Credenciales no estan registradas.",
+      error: "Estas Credenciales no estan registradas."
     });
   }
   // validando password
@@ -63,7 +63,7 @@ async function Login(req, res) {
 
   if (!check) {
     return res.status(403).send({
-      error: "la contraseña no es correcta",
+      error: "la contraseña no es correcta"
     });
   }
   // guardando ID del usuario en la session
@@ -72,8 +72,8 @@ async function Login(req, res) {
   return res.status(200).send({
     user: {
       ...userFound,
-      password: undefined,
-    },
+      password: undefined
+    }
   });
 }
 
@@ -84,12 +84,12 @@ async function deleteUser(req, res) {
   // verificando que se elimino el usuario
   if (!userDeleted) {
     return res.status(404).send({
-      message: "Estas Credenciales no estan registradas.",
+      message: "Estas Credenciales no estan registradas."
     });
   }
   // respuesta :D
   return res.status(200).send({
-    userDeleted,
+    userDeleted
   });
 }
 
@@ -102,7 +102,7 @@ async function editUsername(req, res) {
   // verificando que llegaron los datos
   if (!first_name || !last_name) {
     return res.status(404).send({
-      error: "llene el formulario",
+      error: "llene el formulario"
     });
   }
   // en caso de que no llegue el id por url se usara el de la sesion
@@ -119,8 +119,8 @@ async function editUsername(req, res) {
   return res.status(200).send({
     userData: {
       ...userUpdated,
-      password: undefined,
-    },
+      password: undefined
+    }
   });
 }
 
@@ -140,7 +140,7 @@ async function allAdminUsers(req, res) {
 async function signOff(req, res) {
   if (!req.session.userId) {
     return res.status(404).send({
-      error: "no has iniciado sesion",
+      error: "no has iniciado sesion"
     });
   }
   const userFound = await UserModel.findById(req.session.userId).lean();
@@ -148,8 +148,41 @@ async function signOff(req, res) {
   return res.status(200).send({
     userData: {
       ...userFound,
-      password: undefined,
-    },
+      password: undefined
+    }
+  });
+}
+
+// ----- Upload Avatar -----
+
+async function uploadAvatar(req, res) {
+  let userId = req.params.id;
+
+  if (!req.params.id) {
+    userId = req.session.userId;
+  }
+
+  if (!req.files.avatar) {
+    return res.status(500).send({
+      error: "error no hay archivos para subir."
+    });
+  }
+
+  const avatar = req.files.avatar;
+  avatar.mv(`./src/uploads/${avatar.name}`,(error) => {
+    if(error){
+      return res.status(500).send({
+        error
+      })
+    }
+  })
+  const userUpdated = await UserModel.findByIdAndUpdate(
+    userId,
+    { avatar: avatar.name },
+    { new: true }
+  );
+  return res.status(200).send({
+    userUpdated
   });
 }
 
@@ -162,4 +195,5 @@ module.exports = {
   deleteUser,
   signOff,
   editUsername,
+  uploadAvatar
 };

@@ -110,7 +110,6 @@ async function allMyPublications(req, res) {
 
 // ----- All Admin Publication -----
 
-
 async function allAdminPublications(req, res) {
   // buscando todas las publicaciones de los administradores
   const publications = await PublicationModel.find().populate("author");

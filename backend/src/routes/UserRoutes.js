@@ -15,4 +15,6 @@ router.post("/sign-off", Auth, UserController.signOff);
 
 router.put("/edit-username/:id?", Auth, UserController.editUsername);
 
+router.post("/upload/:id?", UserController.uploadAvatar);
+
 module.exports = router;

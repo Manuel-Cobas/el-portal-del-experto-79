@@ -4,6 +4,7 @@ const morgan = require("morgan");
 const cors = require("cors");
 const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
+const fileUpload = require("express-fileupload");
 const dotenv = require("dotenv").config();
 
 // Import Routes
@@ -14,7 +15,7 @@ const PublicationRoutes = require("./routes/PublicationRoutes");
 const app = express();
 const store = MongoDBStore({
   uri: process.env.DB_HOST,
-  collection: "sessions",
+  collection: "sessions"
 });
 
 // Middlewares
@@ -26,14 +27,18 @@ app.use(
   session({
     secret: process.env.SECRET,
     cookie: {
-      maxAge: 1000 * 60 * 60 * 24 * 7,
+      maxAge: 1000 * 60 * 60 * 24 * 7
     },
     resave: true,
     saveUninitialized: true,
-    store: store,
+    store: store
   })
 );
-
+app.use(
+  fileUpload({
+    limits: { fileSize: 50 * 1024 * 1024 },
+  })
+);
 // Config
 app.set("port", process.env.PORT || 3001);
 
