@@ -169,13 +169,13 @@ async function uploadAvatar(req, res) {
   }
 
   const avatar = req.files.avatar;
-  avatar.mv(`./src/uploads/${avatar.name}`,(error) => {
-    if(error){
+  avatar.mv(`./src/uploads/${avatar.name}`, error => {
+    if (error) {
       return res.status(500).send({
         error
-      })
+      });
     }
-  })
+  });
   const userUpdated = await UserModel.findByIdAndUpdate(
     userId,
     { avatar: avatar.name },
