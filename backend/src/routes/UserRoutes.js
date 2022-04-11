@@ -1,20 +1,31 @@
 const express = require("express");
-const UserController = require("../controllers/UserController");
 const Auth = require("../middlewares/Auth");
 const router = express.Router();
+const {
+  Register,
+  Login,
+  allAdminUsers,
+  deleteUser,
+  signOff,
+  editUsername,
+  uploadAvatar,
+  getImage
+} = require("../controllers/UserController");
 
-router.post("/register", UserController.Register);
+router.post("/register", Register);
 
-router.post("/login", UserController.Login);
+router.post("/login", Login);
 
-router.get("/all-admin-users", Auth, UserController.allAdminUsers);
+router.get("/all-admin-users", Auth, allAdminUsers);
 
-router.delete("/delete-user/:id", Auth, UserController.deleteUser);
+router.delete("/delete-user/:id", Auth, deleteUser);
 
-router.post("/sign-off", Auth, UserController.signOff);
+router.post("/sign-off", Auth, signOff);
 
-router.put("/edit-username/:id?", Auth, UserController.editUsername);
+router.put("/edit-username/:id?", Auth, editUsername);
 
-router.post("/upload/:id?", UserController.uploadAvatar);
+router.post("/upload/:id?", uploadAvatar);
+
+router.get("/get-image/:image", getImage);
 
 module.exports = router;

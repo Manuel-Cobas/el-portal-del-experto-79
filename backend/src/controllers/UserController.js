@@ -1,6 +1,9 @@
 // imports
 const bcrypt = require("bcrypt");
 const DateHelper = require("../helpers/DateHelper");
+const { v4: uuidv4 } = require("uuid");
+const fs = require("fs-extra");
+const path = require("path");
 
 // Models
 const UserModel = require("../models/User");
@@ -138,12 +141,20 @@ async function allAdminUsers(req, res) {
 // ----- Sign Off -----
 
 async function signOff(req, res) {
+  // verificando si hay un id
   if (!req.session.userId) {
     return res.status(404).send({
       error: "no has iniciado sesion"
     });
   }
+  // verificando que exista el usuario
   const userFound = await UserModel.findById(req.session.userId).lean();
+  if (!userFound) {
+    return res.status(500).send({
+      error: "estas credenciales no estan registradas"
+    });
+  }
+  // borrando id de usuario
   req.session.userId = null;
   return res.status(200).send({
     userData: {
@@ -156,6 +167,7 @@ async function signOff(req, res) {
 // ----- Upload Avatar -----
 
 async function uploadAvatar(req, res) {
+  // recibiendo el userId
   let userId = req.params.id;
 
   if (!req.params.id) {
@@ -167,23 +179,63 @@ async function uploadAvatar(req, res) {
       error: "error no hay archivos para subir."
     });
   }
-
+  // recibiendo y validando el archivo
   const avatar = req.files.avatar;
-  avatar.mv(`./src/uploads/${avatar.name}`, error => {
+  const extName = avatar.name.split(".");
+  const fileExt = extName[1];
+  const avatarName = `${uuidv4()}.${extName[1]}`;
+  const path = "./src/uploads/";
+  if (
+    fileExt != "png" &&
+    fileExt != "jpg" &&
+    fileExt != "jpeg" &&
+    fileExt != "gif" &&
+    fileExt != "svg"
+  ) {
+    return res.status(500).send({
+      error: "formato invalido"
+    });
+  }
+
+  if (avatar.size > 5 * 1024 * 1024) {
+    return res.status(404).send({
+      error: "la imagen no puede pesar mas de 5MB"
+    });
+  }
+  // moviendo el archivo a uploads
+  await avatar.mv(`${path}${avatarName}`, async error => {
     if (error) {
       return res.status(500).send({
         error
       });
     }
+    // guardando el nombre de la imagen
+    const userUpdated = await UserModel.findByIdAndUpdate(
+      userId,
+      { avatar: avatarName },
+      { new: true }
+    );
+    return res.status(200).send({
+      userUpdated
+    });
   });
-  const userUpdated = await UserModel.findByIdAndUpdate(
-    userId,
-    { avatar: avatar.name },
-    { new: true }
-  );
-  return res.status(200).send({
-    userUpdated
-  });
+}
+
+// ----- Get Image -----
+
+async function getImage(req, res) {
+  // obteniendo el nombre de la imagen
+  const imageName = req.params.image;
+  const pathImage = `./src/uploads/${imageName}`;
+  // verificandoque exista la imagen
+  const exists = await fs.pathExists(pathImage);
+
+  if (!exists) {
+    return res.status(404).send({
+      error: "este archivo no existe"
+    });
+  }
+  return res.status(200).sendFile(path.resolve(pathImage));
 }
 
 // ----- exports -----
@@ -195,5 +247,6 @@ module.exports = {
   deleteUser,
   signOff,
   editUsername,
-  uploadAvatar
+  uploadAvatar,
+  getImage
 };
