@@ -35,6 +35,7 @@ async function Register(req, res) {
   const userStored = new UserModel({
     ...req.body,
     password: hash,
+    avatar: "",
     role: role !== "USER" ? role.role : "USER",
     hour_key: role !== "USER" ? role.hourKey : undefined
   });
@@ -169,22 +170,30 @@ async function signOff(req, res) {
 async function uploadAvatar(req, res) {
   // recibiendo el userId
   let userId = req.params.id;
-
   if (!req.params.id) {
     userId = req.session.userId;
   }
 
-  if (!req.files.avatar) {
+  if (!req.files) {
     return res.status(500).send({
       error: "error no hay archivos para subir."
     });
   }
   // recibiendo y validando el archivo
+  const userFound = await UserModel.findById(userId);
   const avatar = req.files.avatar;
   const extName = avatar.name.split(".");
   const fileExt = extName[1];
   const avatarName = `${uuidv4()}.${extName[1]}`;
   const path = "./src/uploads/";
+  const exists = await fs.pathExists(`${path}${userFound.avatar}`);
+  // verificando si el usuario ya tiene una foto de perfil
+  if (userFound && userFound.avatar && exists) {
+    // en caso de que tenga una foto de perfil
+    // la nueva sustituye a la anterior eliminandola.
+    await fs.remove(`${path}${userFound.avatar}`);
+  }
+
   if (
     fileExt != "png" &&
     fileExt != "jpg" &&
